@@ -1,52 +1,53 @@
 package com.coderhouse.control;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.coderhouse.acciones.AccionesCliente;
+import com.coderhouse.acciones.ClienteServicio;
 import com.coderhouse.entidades.Cliente;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/clientes")
 public class ControlCliente {
 
     @Autowired
-    private AccionesCliente accionesCliente;
+    private ClienteServicio clienteService;
 
     @GetMapping
-    public List<Cliente> listarClientes() {
-        return accionesCliente.listarClientes();
+    public List<Cliente> getAllClientes() {
+        return clienteService.getAllClientes();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> buscarClientePorId(@PathVariable Long id) {
-        Optional<Cliente> cliente = accionesCliente.buscarClientePorId(id);
-        return cliente.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Cliente> getClienteById(@PathVariable Long id) {
+        Optional<Cliente> cliente = clienteService.getClienteById(id);
+        if (cliente.isPresent()) {
+            return ResponseEntity.ok(cliente.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> guardarCliente(@RequestBody Cliente cliente) {
-        Cliente nuevoCliente = accionesCliente.guardarCliente(cliente);
-        return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
+    public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
+        Cliente nuevoCliente = clienteService.CrearCliente(cliente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCliente);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> actualizarCliente(@PathVariable Long id, @RequestBody Cliente clienteActualizado) {
-        Cliente cliente = accionesCliente.actualizarCliente(id, clienteActualizado);
-        return new ResponseEntity<>(cliente, HttpStatus.OK);
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable Long id, @RequestBody Cliente cliente) {
+        Cliente clienteActualizado = clienteService.ActualizarCliente(id, cliente);
+        return ResponseEntity.ok(clienteActualizado);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
-        accionesCliente.eliminarCliente(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        clienteService.EliminarCliente(id);
+        return ResponseEntity.noContent().build();
     }
 }
-
-
-

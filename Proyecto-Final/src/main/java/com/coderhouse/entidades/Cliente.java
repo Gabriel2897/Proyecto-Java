@@ -1,6 +1,5 @@
 package com.coderhouse.entidades;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,37 +10,29 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private String nombre;
-
-    @Column(nullable = false)
-    private String apellido;
-
-    @Column(nullable = false, unique = true)
-    private String dni;
-
-    private String direccion;
-
-    private String telefono;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    public Cliente() {
     
+    private String nombre;
+    private String apellido;
+    private String dni;
+    private String email;
+    private String direccion;
+    private String telefono;
+    
+    public Cliente() {
+     
     }
-
-    public Cliente(String nombre, String apellido, String dni, String direccion, String telefono, String email) {
+    
+    public Cliente(String nombre, String apellido, String dni, String email, String direccion, String telefono) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.dni = dni;
+        this.email = email;
         this.direccion = direccion;
         this.telefono = telefono;
-        this.email = email;
     }
-
+    
     // Getters y setters
+    
     public Long getId() {
         return id;
     }
@@ -74,6 +65,14 @@ public class Cliente {
         this.dni = dni;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getDireccion() {
         return direccion;
     }
@@ -89,12 +88,17 @@ public class Cliente {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
-
-    public String getEmail() {
-        return email;
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "id=" + id +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", dni='" + dni + '\'' +
+                ", email='" + email + '\'' +
+                ", direccion='" + direccion + '\'' +
+                ", telefono='" + telefono + '\'' +
+                '}';
     }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    
 }

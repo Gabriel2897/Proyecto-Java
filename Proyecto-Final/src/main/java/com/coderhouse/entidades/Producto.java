@@ -1,6 +1,5 @@
 package com.coderhouse.entidades;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,27 +10,23 @@ public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
+    
     private String nombre;
-
-    @Column(nullable = false)
     private double precio;
-
-    @Column(nullable = false)
     private int cantidad;
-
+    
     public Producto() {
 
     }
-
+    
     public Producto(String nombre, double precio, int cantidad) {
         this.nombre = nombre;
         this.precio = precio;
         this.cantidad = cantidad;
     }
-
+    
     // Getters y setters
+    
     public Long getId() {
         return id;
     }
@@ -63,5 +58,4 @@ public class Producto {
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
     }
-
 }
