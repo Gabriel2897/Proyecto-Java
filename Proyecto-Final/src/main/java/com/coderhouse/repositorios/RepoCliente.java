@@ -6,8 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.coderhouse.entidades.Cliente;
 
 @Repository
-public interface Repocliente extends JpaRepository<Cliente, Long> {
-    
+public interface RepoCliente extends JpaRepository<Cliente, Long> {
 }
-
-

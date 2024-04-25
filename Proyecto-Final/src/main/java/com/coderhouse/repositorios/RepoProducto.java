@@ -7,6 +7,4 @@ import com.coderhouse.entidades.Producto;
 
 @Repository
 public interface RepoProducto extends JpaRepository<Producto, Long> {
- 
 }
-

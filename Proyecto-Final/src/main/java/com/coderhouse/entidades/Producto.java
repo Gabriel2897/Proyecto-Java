@@ -1,32 +1,31 @@
 package com.coderhouse.entidades;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
 
-@Entity(name = "productos")
+@Entity(name = "producto")
+@Schema(description = "Modelo de Producto") 
 public class Producto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del producto")
     private Long id;
-    
-    private String nombre;
-    private double precio;
-    private int cantidad;
-    
-    public Producto() {
 
+    @Schema(description = "Nombre del producto")
+    private String producto;
+
+    @Schema(description = "Precio del producto")
+    private double precio;
+
+    @Schema(description = "Cantidad disponible del producto")
+    private int cantidad;
+
+    // Constructor
+    public Producto() {
     }
-    
-    public Producto(String nombre, double precio, int cantidad) {
-        this.nombre = nombre;
-        this.precio = precio;
-        this.cantidad = cantidad;
-    }
-    
-    // Getters y setters
-    
+
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -35,12 +34,12 @@ public class Producto {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getProducto() { 
+        return producto;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setProducto(String producto) { 
+        this.producto = producto;
     }
 
     public double getPrecio() {
@@ -57,5 +56,13 @@ public class Producto {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id +
+               ", Producto: " + producto +
+               ", Precio: " + precio +
+               ", Cantidad: " + cantidad;
     }
 }

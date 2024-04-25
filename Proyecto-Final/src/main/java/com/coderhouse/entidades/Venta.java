@@ -1,53 +1,55 @@
 package com.coderhouse.entidades;
 
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Entity
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Entity(name = "venta")
+@Schema(description = "Modelo de Venta")
 public class Venta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único de la venta")
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
-
     @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    @Schema(description = "Cliente asociado a la venta")
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
-    private List<DetalleVenta> detalles;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "venta_id")
+    @Schema(description = "Items de venta asociados a la venta")
+    private List<ItemVenta> items;
 
-    private double total;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Schema(description = "Fecha de la venta")
+    private Date fecha;
 
-    // Constructor, getters y setters
+    @Schema(description = "Total de la venta")
+    private double totalVenta;
 
+    // Constructor
     public Venta() {
-        this.fecha = new Date();
     }
-
-    public Venta(Cliente cliente) {
+    
+    public Venta(Cliente cliente, List<ItemVenta> items, double totalVenta) {
         this.cliente = cliente;
-        this.fecha = new Date();
+        this.items = items;
+        this.totalVenta = totalVenta;
     }
 
+
+    // Getters y Setters
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Date getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
     }
 
     public Cliente getCliente() {
@@ -58,44 +60,38 @@ public class Venta {
         this.cliente = cliente;
     }
 
-    public List<DetalleVenta> getDetalles() {
-        return detalles;
+    public List<ItemVenta> getItems() {
+        return items;
     }
 
-    public void setDetalles(List<DetalleVenta> detalles) {
-        this.detalles = detalles;
+    public void setItems(List<ItemVenta> items) {
+        this.items = items;
     }
 
-    public double getTotal() {
-        return total;
+    public Date getFecha() {
+        return fecha;
     }
 
-    public void setTotal(double total) {
-        this.total = total;
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
     }
 
-    // Método para calcular y actualizar el total de la venta
-    public void actualizarTotalVenta() {
-        double totalVenta = 0.0;
-        for (DetalleVenta detalle : detalles) {
-            totalVenta += detalle.getCantidad() * detalle.getPrecioUnitario();
-        }
-        this.total = totalVenta;
-    }
-    public void agregarDetalleVenta(DetalleVenta detalleVenta) {
-        if (detalles == null) {
-            detalles = new ArrayList<>();
-        }
-        detalles.add(detalleVenta);
-        detalleVenta.setVenta(this); 
-        actualizarTotalVenta();
+    public double getTotalVenta() {
+        return totalVenta;
     }
 
-    public void eliminarDetalleVenta(DetalleVenta detalleVenta) {
-        if (detalles != null) {
-            detalles.remove(detalleVenta);
-            detalleVenta.setVenta(null); 
-            actualizarTotalVenta();
-        }
+    public void setTotalVenta(double totalVenta) {
+        this.totalVenta = totalVenta;
+    }
+
+    @Override
+    public String toString() {
+        return "Venta{" +
+                "id=" + id +
+                ", cliente=" + cliente +
+                ", items=" + items +
+                ", fecha=" + fecha +
+                ", totalVenta=" + totalVenta +
+                '}';
     }
 }

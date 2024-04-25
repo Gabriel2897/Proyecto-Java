@@ -1,53 +1,72 @@
 package com.coderhouse.control;
-
-import java.util.List;
-import java.util.Optional;
-
+import com.coderhouse.entidades.Producto;
+import com.coderhouse.servicios.ServicioProducto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.coderhouse.acciones.ProductoServicio;
-import com.coderhouse.entidades.Producto;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/productos")
 public class ControlProducto {
 
     @Autowired
-    private ProductoServicio productoService;
+    private ServicioProducto servicioProducto;
 
+    @Operation(summary = "Obtener todos los productos")
     @GetMapping
-    public List<Producto> getAllProductos() {
-        return productoService.getAllProductos();
+    public ResponseEntity<List<Producto>> obtenerTodosProductos() {
+        List<Producto> productos = servicioProducto.obtenerTodosProductos();
+        return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
+    @Operation(summary = "Obtener un producto por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> getProductoById(@PathVariable Long id) {
-        Optional<Producto> producto = productoService.getProductoById(id);
-        if (producto.isPresent()) {
-            return ResponseEntity.ok(producto.get());
+    public ResponseEntity<Producto> obtenerProductoPorId(@PathVariable Long id) {
+        Optional<Producto> producto = servicioProducto.obtenerProductoPorId(id);
+        return producto.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Operation(summary = "Guardar un producto")
+    @PostMapping
+    public ResponseEntity<Producto> guardarProducto(@RequestBody Producto producto) {
+        Producto nuevoProducto = servicioProducto.guardarProducto(producto);
+        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Actualizar un producto por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto actualizado"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        Producto productoActualizado = servicioProducto.actualizarProducto(id, producto);
+        if (productoActualizado != null) {
+            return new ResponseEntity<>(productoActualizado, HttpStatus.OK);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        Producto nuevoProducto = productoService.crearProducto(producto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        Producto productoActualizado = productoService.actualizarProducto(id, producto);
-        return ResponseEntity.ok(productoActualizado);
-    }
-
+    @Operation(summary = "Eliminar un producto por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
-        productoService.eliminarProducto(id);
-        return ResponseEntity.noContent().build();
+        servicioProducto.eliminarProducto(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -1,53 +1,54 @@
 package com.coderhouse.control;
-
-import java.util.List;
-import java.util.Optional;
-
+import com.coderhouse.entidades.Venta;
+import com.coderhouse.servicios.ServicioVenta;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.coderhouse.acciones.VentaServicio;
-import com.coderhouse.entidades.Venta;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ventas")
 public class ControlVenta {
 
     @Autowired
-    private VentaServicio ventaService;
+    private ServicioVenta servicioVenta;
 
-    @GetMapping
-    public List<Venta> getAllVentas() {
-        return ventaService.getAllVentas();
+    @Operation(summary = "Ejecutar una venta")
+    @PostMapping("/ejecutar")
+    public ResponseEntity<Object> ejecutarVenta(@RequestBody Map<String, Object> requestBody) {
+        return servicioVenta.ejecutarVenta(requestBody);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Venta> getVentaById(@PathVariable Long id) {
-        Optional<Venta> venta = ventaService.getVentaById(id);
-        if (venta.isPresent()) {
-            return ResponseEntity.ok(venta.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @Operation(summary = "Listar todas las ventas")
+    @GetMapping("/listar")
+    public List<Venta> listarVentas() {
+        return servicioVenta.listarTodasLasVentas();
     }
 
-    @PostMapping
-    public ResponseEntity<Venta> crearVenta(@RequestBody Venta venta) {
-        Venta nuevaVenta = ventaService.crearVenta(venta);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaVenta);
+    @Operation(summary = "Buscar una venta por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Venta encontrada"),
+            @ApiResponse(responseCode = "404", description = "Venta no encontrada")
+    })
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<Venta> buscarVentaPorId(@PathVariable Long id) {
+        Optional<Venta> venta = servicioVenta.buscarVentaPorId(id);
+        return venta.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Venta> actualizarVenta(@PathVariable Long id, @RequestBody Venta venta) {
-        Venta ventaActualizada = ventaService.actualizarVenta(id, venta);
-        return ResponseEntity.ok(ventaActualizada);
+    @Operation(summary = "Eliminar una venta por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Venta eliminada exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Venta no encontrada")
+    })
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Object> eliminarVenta(@PathVariable Long id) {
+        return servicioVenta.eliminarVenta(id);
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarVenta(@PathVariable Long id) {
-        ventaService.eliminarVenta(id);
-        return ResponseEntity.noContent().build();
-    }   
 }

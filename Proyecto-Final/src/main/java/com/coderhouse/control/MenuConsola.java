@@ -1,680 +1,553 @@
 package com.coderhouse.control;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-
 import com.coderhouse.entidades.Cliente;
-import com.coderhouse.entidades.DetalleVenta;
+import com.coderhouse.entidades.ItemVenta;
 import com.coderhouse.entidades.Producto;
 import com.coderhouse.entidades.Venta;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 @Component
-public class MenuConsola {
+public class MenuConsola implements CommandLineRunner {
 
-    @Autowired
-    private ControlCliente controlCliente;
-    
-    @Autowired
-    private ControlProducto controlProducto;
-    
-    @Autowired
-    private ControlVenta controlVenta;
-    
-    public void mostrarMenuConsola() {
-        Scanner scanner = new Scanner(System.in);
-        int opcion;
+	@Autowired
+	private ControlCliente controlCliente;
 
-        try {
-            do {
-                System.out.println("======= Menú Principal =======");
-                System.out.println("1. Gestionar Clientes");
-                System.out.println("2. Gestionar Productos");
-                System.out.println("3. Realizar Venta");
-                System.out.println("4. Gestionar Ventas");
-                System.out.println("5. Salir");
-                System.out.print("Ingrese su opción: ");
-                opcion = scanner.nextInt();
+	@Autowired
+	private ControlProducto controlProducto;
 
-                switch (opcion) {
-                    case 1:
-                        mostrarMenuClientes();
-                        break;
-                    case 2:
-                        mostrarMenuProductos();
-                        break;
-                    case 3:
-                        realizarVenta();
-                        break;
-                    case 4:
-                        gestionarVentas();
-                        break;
-                    case 5:
-                        System.out.println("Saliendo del programa...");
-                        break;
-                    default:
-                        System.out.println("Opción inválida. Por favor, ingrese una opción válida.");
-                }
-            } while (opcion != 5);
-        } catch (NoSuchElementException e) {
-            System.out.println("Se ha producido un error al leer la entrada del usuario. Saliendo del programa...");
-        } finally {
-        }
-    }
+	@Autowired
+	private ControlVenta controlVenta;
 
-    
-    private void mostrarMenuClientes() {
-        Scanner scanner = new Scanner(System.in);
-        int opcion;
+	private Scanner scanner;
 
-        while (true) {
-            System.out.println("======= Menú Clientes =======");
-            System.out.println("1. Listar Clientes");
-            System.out.println("2. Crear Cliente");
-            System.out.println("3. Actualizar Cliente");
-            System.out.println("4. Eliminar Cliente");
-            System.out.println("5. Volver al Menú Principal");
-            System.out.print("Ingrese su opción: ");
-            opcion = scanner.nextInt();
+	@Override
+	public void run(String... args) throws Exception {
+		Scanner scanner = new Scanner(System.in);
+		int opcion;
 
-            switch (opcion) {
-                case 1:
-                    listarClientes();
-                    break;
-                case 2:
-                    crearCliente();
-                    break;
-                case 3:
-                    actualizarCliente();
-                    break;
-                case 4:
-                    eliminarCliente();
-                    break;
-                case 5:
-                    System.out.println("Volviendo al Menú Principal...");
-                    return; // Salir del método y regresar al menú principal
-                default:
-                    System.out.println("Opción inválida. Por favor, ingrese una opción válida.");
-            }
-        }
-    }
+		do {
+			System.out.println("Menú:");
+			System.out.println("1. Gestionar Clientes");
+			System.out.println("2. Gestionar Productos");
+			System.out.println("3. Realizar una Venta");
+			System.out.println("4. Gestionar Ventas");
+			System.out.println("0. Salir");
+			System.out.print("Ingrese su opción: ");
+			opcion = scanner.nextInt();
 
-    private void listarClientes() {
-        List<Cliente> clientes = controlCliente.getAllClientes();
-        if (!clientes.isEmpty()) {
-            System.out.println("\n=== LISTA DE CLIENTES ===");
-            for (Cliente cliente : clientes) {
-                System.out.println("ID: " + cliente.getId());
-                System.out.println("Nombre completo: " + cliente.getNombre() + " " + cliente.getApellido());
-                System.out.println("DNI: " + cliente.getDni());
-                System.out.println("Email: " + cliente.getEmail());
-                System.out.println("Dirección: " + cliente.getDireccion());
-                System.out.println("Teléfono: " + cliente.getTelefono());
-                System.out.println("-------------------------");
-            }
-        } else {
-            System.out.println("No hay clientes registrados.");
-        }
-    }
+			switch (opcion) {
+			case 1:
+				gestionarClientes();
+				break;
+			case 2:
+				gestionarProductos();
+				break;
+			case 3:
+				realizarVenta();
+				break;
+			case 4:
+				gestionarVentas();
+				break;
+			case 0:
+				System.out.println("Saliendo del menú...");
+				break;
+			default:
+				System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+			}
+		} while (opcion != 0);
+	}
 
-   
-    private void crearCliente() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese el nombre del cliente: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese el apellido del cliente: ");
-        String apellido = scanner.nextLine();
-        System.out.print("Ingrese el DNI del cliente: ");
-        String dni = scanner.nextLine();
-        System.out.print("Ingrese el email del cliente: ");
-        String email = scanner.nextLine();
-        System.out.print("Ingrese la dirección del cliente: ");
-        String direccion = scanner.nextLine();
-        System.out.print("Ingrese el teléfono del cliente: ");
-        String telefono = scanner.nextLine();
-        
-        Cliente nuevoCliente = new Cliente(nombre, apellido, dni, email, direccion, telefono);
-        controlCliente.crearCliente(nuevoCliente);
-        System.out.println("Cliente creado con éxito.");
-    }
+	private void gestionarClientes() {
+		Scanner scanner = new Scanner(System.in);
+		int opcion;
 
-    
-    private void actualizarCliente() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese el ID del cliente a actualizar: ");
-        long id = scanner.nextLong();
-        scanner.nextLine(); // Consumir el salto de línea pendiente
+		do {
+			System.out.println("\nMenú de Gestión de Clientes:");
+			System.out.println("1. Ver todos los clientes");
+			System.out.println("2. Agregar nuevo cliente");
+			System.out.println("3. Actualizar cliente");
+			System.out.println("4. Eliminar cliente");
+			System.out.println("0. Volver al menú principal");
+			System.out.print("Ingrese su opción: ");
+			opcion = scanner.nextInt();
 
-        try {
-            System.out.print("Ingrese el nuevo nombre del cliente: ");
-            String nombre = scanner.nextLine();
-            System.out.print("Ingrese el nuevo apellido del cliente: ");
-            String apellido = scanner.nextLine();
-            System.out.print("Ingrese el nuevo DNI del cliente: ");
-            String dni = scanner.nextLine();
-            System.out.print("Ingrese el nuevo email del cliente: ");
-            String email = scanner.nextLine();
-            System.out.print("Ingrese la nueva dirección del cliente: ");
-            String direccion = scanner.nextLine();
-            System.out.print("Ingrese el nuevo teléfono del cliente: ");
-            String telefono = scanner.nextLine();
-            
-            // Crear un nuevo objeto Cliente utilizando el constructor por defecto
-            Cliente clienteActualizado = new Cliente();
-            
-            // Establecer los valores de los atributos utilizando los métodos setters
-            clienteActualizado.setId(id);
-            clienteActualizado.setNombre(nombre);
-            clienteActualizado.setApellido(apellido);
-            clienteActualizado.setDni(dni);
-            clienteActualizado.setEmail(email);
-            clienteActualizado.setDireccion(direccion);
-            clienteActualizado.setTelefono(telefono);
-            
-            // Llamar al método actualizarCliente del controlador de clientes
-            controlCliente.actualizarCliente(id, clienteActualizado);
-            System.out.println("Cliente actualizado con éxito.");
-        } catch (RuntimeException e) {
-            System.out.println("Error: Cliente no encontrado con ID: " + id + ". Por favor, ingrese un ID válido.");
-        }
-    }
+			switch (opcion) {
+			case 1:
+				verTodosClientes();
+				break;
+			case 2:
+				agregarNuevoCliente();
+				break;
+			case 3:
+				actualizarCliente();
+				break;
+			case 4:
+				eliminarCliente();
+				break;
+			case 0:
+				System.out.println("Volviendo al menú principal...");
+				break;
+			default:
+				System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+			}
+		} while (opcion != 0);
+	}
 
-    private void eliminarCliente() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese el ID del cliente a eliminar: ");
-        long id = scanner.nextLong();
-        controlCliente.eliminarCliente(id);
-        System.out.println("Cliente eliminado con éxito.");
-    }
+	private void verTodosClientes() {
+		// Llama al método del controlador para obtener todos los clientes
+		ResponseEntity<List<Cliente>> responseEntity = controlCliente.obtenerTodosClientes();
 
+		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			// Si la respuesta es exitosa, obtén la lista de clientes del cuerpo de la
+			// respuesta
+			List<Cliente> clientes = responseEntity.getBody();
+			if (clientes.isEmpty()) {
+				System.out.println("No hay clientes registrados.");
+			} else {
+				System.out.println("Lista de Clientes:");
+				for (Cliente cliente : clientes) {
+					System.out.println(cliente);
+				}
+			}
+		} else {
+			// Si no se puede obtener la lista de clientes, muestra un mensaje de error
+			// adecuado
+			System.out.println("Error al obtener la lista de clientes.");
+		}
+	}
 
-    
-    private void mostrarMenuProductos() {
-        int opcion;
+	private void agregarNuevoCliente() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el nombre del cliente: ");
+		String nombre = scanner.nextLine();
+		System.out.print("Ingrese el apellido del cliente: ");
+		String apellido = scanner.nextLine();
+		System.out.print("Ingrese el DNI del cliente: ");
+		String dni = scanner.nextLine();
+		System.out.print("Ingrese el email del cliente: ");
+		String email = scanner.nextLine();
+		System.out.print("Ingrese la dirección del cliente: ");
+		String direccion = scanner.nextLine();
+		System.out.print("Ingrese el teléfono del cliente: ");
+		String telefono = scanner.nextLine();
 
-        do {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("\n*** Menú de Gestión de Productos ***");
-            System.out.println("1. Listar todos los productos");
-            System.out.println("2. Crear un nuevo producto");
-            System.out.println("3. Actualizar un producto existente");
-            System.out.println("4. Eliminar un producto");
-            System.out.println("5. Volver al menú principal");
-            System.out.print("Ingrese la opción deseada: ");
+		// Crear una nueva instancia de Cliente y establecer los valores
+		Cliente nuevoCliente = new Cliente();
+		nuevoCliente.setNombre(nombre);
+		nuevoCliente.setApellido(apellido);
+		nuevoCliente.setDni(dni);
+		nuevoCliente.setEmail(email);
+		nuevoCliente.setDireccion(direccion);
+		nuevoCliente.setTelefono(telefono);
 
-            opcion = scanner.nextInt();
-            scanner.nextLine();
+		// Guardar el nuevo cliente utilizando el servicio
+		ResponseEntity<Cliente> response = controlCliente.guardarCliente(nuevoCliente);
 
-            switch (opcion) {
-                case 1:
-                    listarProductos();
-                    break;
-                case 2:
-                    crearProducto();
-                    break;
-                case 3:
-                    actualizarProducto();
-                    break;
-                case 4:
-                    eliminarProducto();
-                    break;
-                case 5:
-                    System.out.println("Volviendo al menú principal...");
-                    break;
-                default:
-                    System.out.println("Opción inválida. Por favor, seleccione una opción válida.");
-            }
-        } while (opcion != 5);
-        
-    }
-    private void listarProductos() {
-        System.out.println("\n=== LISTA DE PRODUCTOS ===");
-        List<Producto> productos = controlProducto.getAllProductos();
-        if (!productos.isEmpty()) {
-            for (Producto producto : productos) {
-                System.out.println("ID: " + producto.getId() + ", Nombre: " + producto.getNombre() + ", Precio: $" + producto.getPrecio() + ", Cantidad: " + producto.getCantidad());
-            }
-        } else {
-            System.out.println("No hay productos registrados.");
-        }
-    }
+		// Verificar si la solicitud fue exitosa
+		if (response.getStatusCode() == HttpStatus.CREATED) {
+			Cliente clienteGuardado = response.getBody();
+			System.out.println("Nuevo cliente agregado con ID: " + clienteGuardado.getId());
+		} else {
+			// Manejar el caso en que la solicitud no fue exitosa
+			System.out.println("Error al agregar el cliente: " + response.getStatusCode());
+		}
+	}
 
-    private void crearProducto() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("\n=== CREAR NUEVO PRODUCTO ===");
-        System.out.print("Ingrese el nombre del producto: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese el precio del producto: ");
-        double precio = scanner.nextDouble();
-        System.out.print("Ingrese la cantidad en stock del producto: ");
-        int cantidad = scanner.nextInt();
+	private void actualizarCliente() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el ID del cliente a actualizar: ");
+		Long id = scanner.nextLong();
+		scanner.nextLine(); // Limpiar el buffer del scanner
 
-        // Crear el objeto Producto
-        Producto nuevoProducto = new Producto(nombre, precio, cantidad);
+		// Obtener el cliente del servicio utilizando su ID
+		ResponseEntity<Cliente> response = controlCliente.obtenerClientePorId(id);
 
-        // Llamar al método del controlador para crear el producto
-        ResponseEntity<Producto> response = controlProducto.crearProducto(nuevoProducto);
+		// Verificar si el cliente fue encontrado
+		if (response.getStatusCode() == HttpStatus.OK) {
+			Cliente cliente = response.getBody();
 
-        // Verificar la respuesta del controlador
-        if (response.getStatusCode() == HttpStatus.CREATED) {
-            System.out.println("Producto creado con éxito.");
-        } else {
-            System.out.println("Error al crear el producto. Por favor, inténtelo de nuevo.");
-        }
-    }
+			// Solicitar al usuario que ingrese los nuevos datos del cliente
+			System.out.println("Ingrese los nuevos datos del cliente:");
 
+			System.out.print("Nombre: ");
+			String nombre = scanner.nextLine();
 
-    private void actualizarProducto() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("\n=== ACTUALIZAR PRODUCTO ===");
-        System.out.print("Ingrese el ID del producto a actualizar: ");
-        long id = scanner.nextLong();
-        scanner.nextLine();
-        System.out.print("Ingrese el nuevo nombre del producto: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese el nuevo precio del producto: ");
-        double precio = scanner.nextDouble();
-        System.out.print("Ingrese la nueva cantidad en stock del producto: ");
-        int cantidad = scanner.nextInt();
+			System.out.print("Apellido: ");
+			String apellido = scanner.nextLine();
 
-        // Crear el objeto Producto actualizado
-        Producto productoActualizado = new Producto(nombre, precio, cantidad);
+			System.out.print("DNI: ");
+			String dni = scanner.nextLine();
 
-        // Llamar al método del controlador para actualizar el producto
-        ResponseEntity<Producto> response = controlProducto.actualizarProducto(id, productoActualizado);
+			System.out.print("Email: ");
+			String email = scanner.nextLine();
 
-        // Verificar la respuesta del controlador
-        if (response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Producto actualizado con éxito.");
-        } else {
-            System.out.println("Error al actualizar el producto. Por favor, inténtelo de nuevo.");
-        }
-    }
+			System.out.print("Dirección: ");
+			String direccion = scanner.nextLine();
 
+			System.out.print("Teléfono: ");
+			String telefono = scanner.nextLine();
 
-    private void eliminarProducto() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("\n=== ELIMINAR PRODUCTO ===");
-        System.out.print("Ingrese el ID del producto a eliminar: ");
-        long id = scanner.nextLong();
+			// Actualizar el cliente con los nuevos datos
+			cliente.setNombre(nombre);
+			cliente.setApellido(apellido);
+			cliente.setDni(dni);
+			cliente.setEmail(email);
+			cliente.setDireccion(direccion);
+			cliente.setTelefono(telefono);
 
-        // Llamar al método del controlador para eliminar el producto
-        ResponseEntity<Void> response = controlProducto.eliminarProducto(id);
+			// Actualizar el cliente utilizando el servicio
+			ResponseEntity<Cliente> responseActualizacion = controlCliente.actualizarCliente(id, cliente);
 
-        // Verificar la respuesta del controlador
-        if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-            System.out.println("Producto eliminado con éxito.");
-        } else {
-            System.out.println("Error al eliminar el producto. Por favor, inténtelo de nuevo.");
-        }
-    }
+			// Verificar si la solicitud de actualización fue exitosa
+			if (responseActualizacion.getStatusCode() == HttpStatus.OK) {
+				System.out.println("Cliente actualizado correctamente.");
+			} else {
+				// Manejar el caso en que la solicitud no fue exitosa
+				System.out.println("Error al actualizar el cliente: " + responseActualizacion.getStatusCode());
+			}
+		} else {
+			System.out.println("No se encontró ningún cliente con el ID proporcionado.");
+		}
+	}
 
-    
-    private void realizarVenta() {
-        Scanner scanner = new Scanner(System.in);
-        List<DetalleVenta> detallesVenta = new ArrayList<>();
+	private void eliminarCliente() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el ID del cliente a eliminar: ");
+		Long id = scanner.nextLong();
+		controlCliente.eliminarCliente(id);
+		System.out.println("Cliente eliminado correctamente.");
+	}
 
-        try {
-        	 // Mostrar cliente
-        	System.out.println("=== Lista de Clientes ===");
-        	List<Cliente> clientes = controlCliente.getAllClientes();
-        	if (!clientes.isEmpty()) {
-        	    for (Cliente cliente : clientes) {
-        	        System.out.println("ID:" + cliente.getId() + " - "+ cliente.getNombre() +" "+ cliente.getApellido());
-        	    }
-        	} else {
-        	    System.out.println("No hay clientes registrados.");
-        	}
+	private void gestionarProductos() {
+		Scanner scanner = new Scanner(System.in);
+		int opcion;
 
-            // Paso 1: Seleccionar un cliente
-        	System.out.print("Ingrese el ID del cliente: ");
-        	long idCliente = scanner.nextLong();
-        	scanner.nextLine();
-            ResponseEntity<Cliente> responseCliente = controlCliente.getClienteById(idCliente);
-            if (responseCliente.getStatusCode() == HttpStatus.OK) {
-                Cliente cliente = responseCliente.getBody();
-                
-                // Paso 2: Mostrar la lista de productos
-                System.out.println("=== Lista de Productos ===");
-                List<Producto> productos = controlProducto.getAllProductos();
-                if (!productos.isEmpty()) {
-                    for (Producto producto : productos) {
-                        System.out.println("ID: - " + producto.getId()+ " "+ producto.getNombre() + ", Precio: $" + producto.getPrecio() + "   - Cantidad Disponible : " + producto.getCantidad());
-                    }
-                    // Paso 3: Comprar productos
-                    boolean comprarMasProductos = true;
-                    while (comprarMasProductos) {
-                        System.out.print("Ingrese el ID del producto que desea comprar: ");
-                        long idProducto = scanner.nextLong();
-                        ResponseEntity<Producto> responseProducto = controlProducto.getProductoById(idProducto);
-                        if (responseProducto.getStatusCode() == HttpStatus.OK) {
-                            Producto producto = responseProducto.getBody();
-                            System.out.print("Ingrese la cantidad que desea comprar: ");
-                            int cantidad = scanner.nextInt();
-                            DetalleVenta detalleVenta = new DetalleVenta();
-                            detalleVenta.setProducto(producto);
-                            detalleVenta.setCantidad(cantidad);
-                            detallesVenta.add(detalleVenta);
-                            System.out.print("¿Desea comprar otro producto? (S/N): ");
-                            String respuesta = scanner.next();
-                            comprarMasProductos = respuesta.equalsIgnoreCase("S");
-                        } else {
-                            System.out.println("Producto no encontrado.");
-                        }
-                    }
-                 // Paso 4: Realizar la venta
-                    Venta venta = new Venta();
-                    venta.setCliente(cliente);
-                    venta.setDetalles(detallesVenta);
-                    ResponseEntity<Venta> responseVenta = controlVenta.crearVenta(venta);
-                    if (responseVenta.getStatusCode() == HttpStatus.CREATED) {
-                        // Venta realizada con éxito
-                        Venta ventaCreada = responseVenta.getBody();
-                        System.out.println("Venta realizada con éxito:");
-                        System.out.println("ID de Venta: " + ventaCreada.getId());
-                        System.out.println("Fecha de Venta: " + ventaCreada.getFecha());
-                        System.out.println("Cliente: " + ventaCreada.getCliente().getNombre() + " " + ventaCreada.getCliente().getApellido());
-                        System.out.println("Total de Venta: $" + ventaCreada.getTotal());
+		do {
+			System.out.println("\nMenú de Gestión de Productos:");
+			System.out.println("1. Ver todos los productos");
+			System.out.println("2. Agregar nuevo producto");
+			System.out.println("3. Actualizar producto");
+			System.out.println("4. Eliminar producto");
+			System.out.println("0. Volver al menú principal");
+			System.out.print("Ingrese su opción: ");
+			opcion = scanner.nextInt();
 
-                        System.out.println("Productos comprados:");
-                        for (DetalleVenta detalle : ventaCreada.getDetalles()) {
-                            Producto producto = detalle.getProducto();
-                            System.out.println("   - Nombre: " + producto.getNombre() + ", Precio: $" + producto.getPrecio() + ", Cantidad: " + detalle.getCantidad());
-                        }
-                    } else {
-                        // Error al realizar la venta
-                        System.out.println("Error al realizar la venta.");
-                    }
-                } else {
-                    System.out.println("No hay productos disponibles. Cancelando venta.");
-                }
-            } else {
-                System.out.println("Cliente no encontrado. Cancelando venta.");
-            }
-        } catch (InputMismatchException ex) {
-            System.out.println("Error: Entrada inválida. Asegúrese de ingresar un número.");
-        } catch (NoSuchElementException ex) {
-            System.out.println("Error: Entrada no encontrada.");
-        } catch (Exception ex) {
-            System.out.println("Error inesperado: " + ex.getMessage());
-        } finally {
-           
-        }
-    }
-    
-    private void gestionarVentas() {
-        Scanner scanner = new Scanner(System.in);
-        int opcion;
+			switch (opcion) {
+			case 1:
+				verTodosProductos();
+				break;
+			case 2:
+				agregarNuevoProducto();
+				break;
+			case 3:
+				actualizarProducto();
+				break;
+			case 4:
+				eliminarProducto();
+				break;
+			case 0:
+				System.out.println("Volviendo al menú principal...");
+				break;
+			default:
+				System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+			}
+		} while (opcion != 0);
+	}
 
-        do {
-            System.out.println("\n======= Menú de Gestión de Ventas =======");
-            System.out.println("1. Listar todas las ventas");
-            System.out.println("2. Actualizar venta");
-            System.out.println("3. Eliminar venta");
-            System.out.println("4. Volver al Menú Principal");
-            System.out.print("Ingrese su opción: ");
-            opcion = scanner.nextInt();
+	private void verTodosProductos() {
+		// Obtener la lista de todos los productos utilizando el servicio
+		ResponseEntity<List<Producto>> responseEntity = controlProducto.obtenerTodosProductos();
 
-            switch (opcion) {
-                case 1:
-                    listarVentas();
-                    break;
-                case 2:
-                    actualizarVenta();
-                    break;
-                case 3:
-                    eliminarVenta();
-                    break;
-                case 4:
-                    System.out.println("Volviendo al Menú Principal...");
-                    break;
-                default:
-                    System.out.println("Opción inválida. Por favor, ingrese una opción válida.");
-            }
-        } while (opcion != 4);
-    }
-    private void listarVentas() {
-        List<Venta> ventas = controlVenta.getAllVentas();
-        if (!ventas.isEmpty()) {
-            System.out.println("\n=== LISTA DE VENTAS ===");
-            for (Venta venta : ventas) {
-                System.out.println("ID de Venta: " + venta.getId());
-                System.out.println("Fecha de Venta: " + venta.getFecha());
-                System.out.println("Cliente: " + venta.getCliente().getNombre() + " " + venta.getCliente().getApellido());
-                System.out.println("Total de Venta: $" + venta.getTotal());
+		// Verificar si la respuesta fue exitosa
+		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			// Obtener la lista de productos del cuerpo de la respuesta
+			List<Producto> productos = responseEntity.getBody();
 
-                List<DetalleVenta> detalles = venta.getDetalles();
-                System.out.println("Productos comprados:");
-                if (!detalles.isEmpty()) {
-                    for (DetalleVenta detalle : detalles) {
-                        Producto producto = detalle.getProducto();
-                        System.out.println("   - Nombre: " + producto.getNombre() + ", Precio: $" + producto.getPrecio() + ", Cantidad: " + detalle.getCantidad());
-                    }
-                } else {
-                    System.out.println("   No hay productos comprados.");
-                }
-                System.out.println("-------------------------");
-                System.out.println("-------------------------");
-            }
-        } else {
-            System.out.println("No hay ventas registradas.");
-        }
-    }
- //No funciona bien cambiar
-    private void actualizarVenta() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese el ID de la venta a actualizar: ");
-        long idVenta = scanner.nextLong();
-        scanner.nextLine();
+			// Verificar si la lista está vacía
+			if (productos.isEmpty()) {
+				System.out.println("No hay productos registrados.");
+			} else {
+				// Mostrar la lista de productos
+				System.out.println("Lista de Productos:");
+				for (Producto producto : productos) {
+					System.out.println("ID: " + producto.getId());
+					System.out.println("Nombre: " + producto.getProducto());
+					System.out.println("Precio: " + producto.getPrecio());
+					System.out.println("Cantidad: " + producto.getCantidad());
+					System.out.println("-------------------------------------");
+				}
+			}
+		} else {
+			// Mostrar un mensaje de error si no se puede obtener la lista de productos
+			System.out.println("Error al obtener la lista de productos.");
+		}
+	}
 
-        ResponseEntity<Venta> responseVenta = controlVenta.getVentaById(idVenta);
+	private void agregarNuevoProducto() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el nombre del producto: ");
+		String nombre = scanner.nextLine();
+		System.out.print("Ingrese el precio del producto: ");
+		double precio = scanner.nextDouble();
+		System.out.print("Ingrese la cantidad del producto: ");
+		int cantidad = scanner.nextInt();
 
-        if (responseVenta.getStatusCode() == HttpStatus.OK) {
-            Venta venta = responseVenta.getBody();
+		// Crear una nueva instancia de Producto y establecer los valores
+		Producto nuevoProducto = new Producto();
+		nuevoProducto.setProducto(nombre);
+		nuevoProducto.setPrecio(precio);
+		nuevoProducto.setCantidad(cantidad);
 
-         // Mostrar los detalles actuales de la venta
-            System.out.println("Detalles de la venta a actualizar:");
-            System.out.println("ID: " + venta.getId());
-            System.out.println("Fecha: " + venta.getFecha());
-            System.out.println("Cliente: " + venta.getCliente().getNombre() + " " + venta.getCliente().getApellido());
-            System.out.println("Total: $" + venta.getTotal());
+		// Guardar el nuevo producto utilizando el servicio
+		ResponseEntity<Producto> response = controlProducto.guardarProducto(nuevoProducto);
 
-            // Mostrar los detalles de los productos comprados
-            System.out.println("Productos comprados:");
-            for (DetalleVenta detalle : venta.getDetalles()) {
-                Producto producto = detalle.getProducto();
-                System.out.println("   - Producto: " + producto.getNombre());
-                System.out.println("     Precio unitario: $" + producto.getPrecio());
-                System.out.println("     Cantidad: " + detalle.getCantidad());
-                System.out.println("     Total parcial: $" + detalle.getCantidad() * producto.getPrecio());
-                System.out.println("--------------------------------------------");
-            }
+		// Verificar si la solicitud fue exitosa
+		if (response.getStatusCode() == HttpStatus.CREATED) {
+			Producto productoGuardado = response.getBody();
+			System.out.println("Nuevo producto agregado con ID: " + productoGuardado.getId());
+		} else {
+			// Manejar el caso en que la solicitud no fue exitosa
+			System.out.println("Error al agregar el producto: " + response.getStatusCode());
+		}
+	}
 
-            // Mostrar opciones adicionales para agregar, cambiar o actualizar productos
-            System.out.println("\nOpciones adicionales:");
-            System.out.println("1. Agregar producto");
-            System.out.println("2. Cambiar producto");
-            System.out.println("3. Cambiar cantidad de producto");
-            System.out.println("4. Eliminar producto");
-            System.out.println("5. Continuar sin cambios");
-            System.out.print("Ingrese la opción deseada: ");
-            int opcion = scanner.nextInt();
-            scanner.nextLine();
+	private void actualizarProducto() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el ID del producto a actualizar: ");
+		Long id = scanner.nextLong();
+		scanner.nextLine(); // Limpiar el buffer del scanner
 
-            switch (opcion) {
-             //Agregar un nuevo producto
-            case 1:
-                System.out.print("Ingrese el ID del nuevo producto: ");
-                long idNuevoProducto = scanner.nextLong();
-                scanner.nextLine();
-                System.out.print("Ingrese la cantidad del nuevo producto: ");
-                int cantidadNuevoProducto = scanner.nextInt();
-                scanner.nextLine();
+		// Obtener el producto del servicio utilizando su ID
+		ResponseEntity<Producto> response = controlProducto.obtenerProductoPorId(id);
 
-                // Obtener el producto utilizando el ControlProducto
-                ResponseEntity<Producto> responseProducto = controlProducto.getProductoById(idNuevoProducto);
+		// Verificar si el producto fue encontrado
+		if (response.getStatusCode() == HttpStatus.OK) {
+			Producto producto = response.getBody();
 
-                if (responseProducto.getStatusCode() == HttpStatus.OK) {
-                    Producto nuevoProducto = responseProducto.getBody();
-                    DetalleVenta nuevoDetalle = new DetalleVenta();
-                    nuevoDetalle.setProducto(nuevoProducto);
-                    nuevoDetalle.setCantidad(cantidadNuevoProducto);
-                    venta.getDetalles().add(nuevoDetalle);
-                    System.out.println("Producto agregado con éxito a la venta.");
+			// Solicitar al usuario que ingrese los nuevos datos del producto
+			System.out.println("Ingrese los nuevos datos del producto:");
 
-                 // Mostrar la venta actualizada
-                 System.out.println("\nVenta actualizada:");
-                 mostrarDetallesVentaActualizada(venta);
-                 System.out.println("Venta actualizada con éxito.");
-                 System.out.println("-------------------------");
-                } else {
-                    System.out.println("No se encontró ningún producto con el ID proporcionado.");
-                }
-                break;
+			System.out.print("Nombre: ");
+			String nombre = scanner.nextLine();
 
-            case 2:
-                // Cambiar producto
-                System.out.println("Productos actuales en la venta:");
-                for (DetalleVenta detalle : venta.getDetalles()) {
-                    System.out.println("ID: " + detalle.getProducto().getId() + ", Nombre: " + detalle.getProducto().getNombre() + ", Cantidad: " + detalle.getCantidad());
-                }
-                System.out.print("Ingrese el ID del producto que desea cambiar: ");
-                long idProductoACambiar = scanner.nextLong();
-                scanner.nextLine();
-                System.out.print("Ingrese el nuevo ID del producto: ");
-                long nuevoIdProducto = scanner.nextLong();
-                scanner.nextLine();
+			System.out.print("Precio: ");
+			double precio = scanner.nextDouble();
 
-                // Obtener el nuevo producto utilizando el ControlProducto
-                ResponseEntity<Producto> responseNuevoProducto = controlProducto.getProductoById(nuevoIdProducto);
+			System.out.print("Cantidad: ");
+			int cantidad = scanner.nextInt();
 
-                if (responseNuevoProducto.getStatusCode() == HttpStatus.OK) {
-                    Producto productoActualizado = responseNuevoProducto.getBody();
-                    // Buscar el detalle del producto a cambiar en la lista de detalles de la venta
-                    for (DetalleVenta detalle : venta.getDetalles()) {
-                        if (detalle.getProducto().getId() == idProductoACambiar) {
-                            detalle.setProducto(productoActualizado);
-                            System.out.println("Producto cambiado con éxito en la venta.");
-                            return;
-                        }
-                    }
-                    System.out.println("No se encontró ningún producto con el ID proporcionado en la venta.");
-                } else {
-                    System.out.println("No se encontró ningún producto con el nuevo ID proporcionado.");
-                }
-                break;
+			// Actualizar el producto con los nuevos datos
+			producto.setProducto(nombre);
+			producto.setPrecio(precio);
+			producto.setCantidad(cantidad);
 
-            case 3:
-                // Cambiar cantidad de producto
-                System.out.println("Productos actuales en la venta:");
-                for (DetalleVenta detalle : venta.getDetalles()) {
-                    System.out.println("ID: " + detalle.getProducto().getId() + ", Nombre: " + detalle.getProducto().getNombre() + ", Cantidad: " + detalle.getCantidad());
-                }
-                System.out.print("Ingrese el ID del producto del que desea cambiar la cantidad: ");
-                long idProductoACambiarCantidad = scanner.nextLong();
-                scanner.nextLine(); 
-                System.out.print("Ingrese la nueva cantidad: ");
-                int nuevaCantidad = scanner.nextInt();
+			// Actualizar el producto utilizando el servicio
+			ResponseEntity<Producto> responseActualizacion = controlProducto.actualizarProducto(id, producto);
 
-                // Buscar el detalle del producto a cambiar en la lista de detalles de la venta
-                for (DetalleVenta detalle : venta.getDetalles()) {
-                    if (detalle.getProducto().getId() == idProductoACambiarCantidad) {
-                        detalle.setCantidad(nuevaCantidad);
-                        System.out.println("Cantidad del producto cambiada con éxito en la venta.");
-                        return;
-                    }
-                }
-                System.out.println("No se encontró ningún producto con el ID proporcionado en la venta.");
-                break;
+			// Verificar si la solicitud de actualización fue exitosa
+			if (responseActualizacion.getStatusCode() == HttpStatus.OK) {
+				System.out.println("Producto actualizado correctamente.");
+			} else {
+				// Manejar el caso en que la solicitud no fue exitosa
+				System.out.println("Error al actualizar el producto: " + responseActualizacion.getStatusCode());
+			}
+		} else {
+			System.out.println("No se encontró ningún producto con el ID proporcionado.");
+		}
+	}
 
-            case 4:
-                // Eliminar producto
-                System.out.println("Productos actuales en la venta:");
-                for (DetalleVenta detalle : venta.getDetalles()) {
-                    System.out.println("ID: " + detalle.getProducto().getId() + ", Nombre: " + detalle.getProducto().getNombre() + ", Cantidad: " + detalle.getCantidad());
-                }
-                System.out.print("Ingrese el ID del producto que desea eliminar: ");
-                long idProductoAEliminar = scanner.nextLong();
+	private void eliminarProducto() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Ingrese el ID del producto a eliminar: ");
+		Long id = scanner.nextLong();
+		controlProducto.eliminarProducto(id);
+		System.out.println("Producto eliminado correctamente.");
+	}
 
-                // Buscar el detalle del producto a eliminar en la lista de detalles de la venta
-                DetalleVenta detalleAEliminar = null;
-                for (DetalleVenta detalle : venta.getDetalles()) {
-                    if (detalle.getProducto().getId() == idProductoAEliminar) {
-                        detalleAEliminar = detalle;
-                        break;
-                    }
-                }
+	public void mostrarClientes() {
+	    // Llama al método obtenerTodosClientes() del ControlCliente para obtener la lista de clientes
+	    ResponseEntity<List<Cliente>> response = controlCliente.obtenerTodosClientes();
+	    
+	    if (response.getStatusCode() == HttpStatus.OK) {
+	        List<Cliente> clientes = response.getBody();
+	        for (Cliente cliente : clientes) {
+	            System.out.println(cliente.getId() + ": " + cliente.getNombre() + " " + cliente.getApellido());
+	        }
+	    } else {
+	        System.out.println("No se pudo obtener la lista de clientes.");
+	    }
+	}
 
-                if (detalleAEliminar != null) {
-                    // Eliminar el detalle del producto de la lista de detalles de la venta
-                    venta.getDetalles().remove(detalleAEliminar);
-                    System.out.println("Producto eliminado con éxito de la venta.");
-                } else {
-                    System.out.println("No se encontró ningún producto con el ID proporcionado en la venta.");
-                }
-                break;
+	public void realizarVenta() {
+	    Scanner scanner = new Scanner(System.in);
+	    System.out.println("Realizar una venta:");
 
-            case 5:
-                // Continuar sin cambios
-                return;
-                default:
-                    System.out.println("Opción inválida. Volviendo al menú principal.");
-                    return;
-            }
+	    // Mostrar la lista de clientes disponibles
+	    System.out.println("\nLista de Clientes:");
+	    mostrarClientes();
+	    System.out.print("Seleccione el ID del cliente: ");
+	    Long clienteId = scanner.nextLong();
+	    scanner.nextLine(); // Consumir el salto de línea
 
-            ResponseEntity<Venta> responseActualizacion = controlVenta.actualizarVenta(idVenta, venta);
+	    // Obtener el cliente seleccionado utilizando el servicio
+	    ResponseEntity<Cliente> responseCliente = controlCliente.obtenerClientePorId(clienteId);
+	    if (responseCliente.getStatusCode() == HttpStatus.OK) {
+	        Cliente cliente = responseCliente.getBody();
 
-            if (responseActualizacion.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Venta actualizada con éxito.");
-            } else {
-                System.out.println("Error al actualizar la venta. Por favor, inténtelo de nuevo.");
-            }
-        } else {
-            System.out.println("No se encontró ninguna venta con el ID proporcionado.");
-        }
-    }
-    public void eliminarVenta() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Ingrese el ID de la venta que desea eliminar: ");
-        long idVentaAEliminar = scanner.nextLong();
-        scanner.nextLine(); // Consumir el salto de línea pendiente
+	        // Mostrar la lista de productos disponibles
+	        System.out.println("\nLista de Productos:");
+	        verTodosProductos();
+
+	        // Inicializar variables para la venta
+	        List<ItemVenta> items = new ArrayList<>();
+	        double totalVenta = 0;
+
+	        // Proceso de selección de productos
+	        boolean agregarMasProductos = true;
+	        while (agregarMasProductos) {
+	            System.out.print("\nSeleccione el ID del producto: ");
+	            Long productoId = scanner.nextLong();
+	            scanner.nextLine(); // Consumir el salto de línea
+
+	            System.out.print("Ingrese la cantidad: ");
+	            int cantidad = scanner.nextInt();
+	            scanner.nextLine(); // Consumir el salto de línea
+
+	            // Obtener el producto seleccionado utilizando el servicio
+	            ResponseEntity<Producto> responseProducto = controlProducto.obtenerProductoPorId(productoId);
+	            if (responseProducto.getStatusCode() == HttpStatus.OK) {
+	                Producto producto = responseProducto.getBody();
+	                // Verificar si hay suficiente cantidad de producto disponible
+	                if (cantidad > producto.getCantidad()) {
+	                    System.out.println("No hay suficiente cantidad disponible para este producto.");
+	                } else {
+	                    // Calcular el subtotal y agregar el item a la lista de items
+	                    double subtotal = cantidad * producto.getPrecio();
+	                    totalVenta += subtotal;
+	                    ItemVenta itemVenta = new ItemVenta(producto, cantidad, subtotal);
+	                    items.add(itemVenta);
+	                }
+	            } else {
+	                System.out.println("El producto seleccionado no existe.");
+	            }
+
+	            // Preguntar al usuario si desea agregar más productos
+	            System.out.print("¿Desea agregar otro producto? (S/N): ");
+	            String respuesta = scanner.nextLine().trim().toLowerCase();
+	            agregarMasProductos = respuesta.equals("s");
+	        }
+
+	        // Mostrar el resumen de la venta
+	        System.out.println("\nResumen de la Venta:");
+	        System.out.println("Cliente: " + cliente.getNombre() + " " + cliente.getApellido());
+	        for (ItemVenta item : items) {
+	            System.out.println("Producto: " + item.getProducto().getProducto());
+	            System.out.println("Cantidad: " + item.getCantidad());
+	            System.out.println("Subtotal: " + item.getTotal());
+	        }
+	        System.out.println("Total: " + totalVenta);
+
+	        // Construir el cuerpo de la solicitud
+	        Map<String, Object> requestBody = new HashMap<>();
+	        Map<String, Object> clienteMap = new HashMap<>();
+	        clienteMap.put("clienteid", cliente.getId());
+	        requestBody.put("cliente", clienteMap);
+	        
+	        List<Map<String, Object>> lineas = new ArrayList<>();
+	        for (ItemVenta item : items) {
+	            Map<String, Object> linea = new HashMap<>();
+	            linea.put("productoid", item.getProducto().getId());
+	            linea.put("cantidad", item.getCantidad());
+	            lineas.add(linea);
+	        }
+	        requestBody.put("lineas", lineas);
+
+	        // Guardar la venta y los items de venta en la base de datos utilizando el servicio
+	        ResponseEntity<Object> responseVenta = controlVenta.ejecutarVenta(requestBody);
+	        if (responseVenta.getStatusCode() == HttpStatus.OK) {
+	            System.out.println("Venta realizada exitosamente.");
+	        } else {
+	            System.out.println("Error al realizar la venta: " + responseVenta.getBody());
+	        }
+	    } else {
+	        System.out.println("El cliente seleccionado no existe.");
+	    }
+	}
+
+	private void gestionarVentas() {
+		Scanner scanner = new Scanner(System.in);
+		int opcion;
+
+		do {
+			System.out.println("Gestión de Ventas");
+			System.out.println("1. Mostrar todas las ventas");
+			System.out.println("2. Eliminar una venta");
+			System.out.println("3. Volver al menú principal");
+			System.out.print("Ingrese su opción: ");
+			opcion = scanner.nextInt();
+
+			switch (opcion) {
+			case 1:
+				verTodasLasVentas();
+				break;
+			case 2:
+				eliminarVenta();
+				break;
+			case 3:
+				System.out.println("Volviendo al menú principal...");
+				break;
+			default:
+				System.out.println("Opción inválida. Por favor, ingrese una opción válida.");
+			}
+		} while (opcion != 3);
+	}
+
+	public void verTodasLasVentas() {
+	    // Llamar al método del controlador para obtener la lista de ventas
+	    List<Venta> ventas = controlVenta.listarVentas();
+
+	    // Verificar si hay ventas disponibles
+	    if (ventas != null && !ventas.isEmpty()) {
+	        System.out.println("Listado de Ventas:");
+	        for (Venta venta : ventas) {
+	            System.out.println("ID: " + venta.getId());
+	            System.out.println("Fecha: " + venta.getFecha());
+	            System.out.println("Cliente: " + venta.getCliente().getNombre() + " " + venta.getCliente().getApellido());
+	            System.out.println("Total: " + venta.getTotalVenta());
+	            System.out.println("--------------------------------------");
+	        }
+	    } else {
+	        System.out.println("No hay ventas disponibles.");
+	    }
+	}
+
+	public void eliminarVenta() {
+        System.out.println("Eliminar una venta:");
+
+        // Solicitar al usuario que ingrese el ID de la venta a eliminar
+        System.out.print("Ingrese el ID de la venta a eliminar: ");
+        Long ventaId = scanner.nextLong();
+        scanner.nextLine(); // Consumir el salto de línea
 
         // Llamar al método del controlador para eliminar la venta
-        ResponseEntity<Void> responseEliminarVenta = controlVenta.eliminarVenta(idVentaAEliminar);
+        ResponseEntity<Object> responseEntity = controlVenta.eliminarVenta(ventaId);
 
-        // Verificar la respuesta del controlador
-        if (responseEliminarVenta.getStatusCode() == HttpStatus.NO_CONTENT) {
-            System.out.println("Venta eliminada con éxito.");
+        // Verificar si la solicitud fue exitosa (código de estado 200)
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            System.out.println("Venta eliminada exitosamente.");
         } else {
-            System.out.println("Error al eliminar la venta. Por favor, inténtelo de nuevo.");
+            System.out.println("Error al eliminar la venta. Detalles: " + responseEntity.getBody());
         }
     }
-    private void mostrarDetallesVentaActualizada(Venta venta) {
-        System.out.println("\nDetalles de la venta actualizada:");
-        System.out.println("ID: " + venta.getId());
-        System.out.println("Fecha: " + venta.getFecha());
-        System.out.println("Cliente: " + venta.getCliente().getNombre() + " " + venta.getCliente().getApellido());
-        System.out.println("Total: $" + venta.getTotal());
-
-        // Mostrar los detalles de los productos comprados
-        System.out.println("Productos comprados:");
-        for (DetalleVenta detalle : venta.getDetalles()) {
-            Producto producto = detalle.getProducto();
-            System.out.println("   - Producto: " + producto.getNombre());
-            System.out.println("     Precio unitario: $" + producto.getPrecio());
-            System.out.println("     Cantidad: " + detalle.getCantidad());
-            System.out.println("     Total parcial: $" + detalle.getCantidad() * producto.getPrecio());
-            System.out.println("--------------------------------------------");
-        }
-    }
-
 }
-
